@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Arabic Hearing Assessment Experiment (AHAE)
 
-## Getting Started
+A specialized web platform designed to conduct hearing experiments for Arabic phonetics. Teachers can upload structured test lists via Excel, and students can participate in assessments without the need for an account.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+* **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
+* **Database & Backend:** [Convex](https://www.convex.dev/) (Real-time database and serverless functions)
+* **Authentication:** [Clerk](https://clerk.com/) (Google OAuth for Teacher/Admin access)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/) (@tailwindcss/postcss: ^4)
+* **File Parsing:** [XLSX / SheetJS](https://sheetjs.com/) (For processing `.xlsx` uploads)
+
+
+## dev:
+bun create next-app@latest . --yes
+bun convex
+bun convex dev
+---
+
+## 🛠️ Core Features
+
+### 👨‍🏫 Teacher Dashboard (Authenticated)
+* **Google Login:** Secure access via Clerk.
+* **Test Management:** Upload `.xlsx` files to generate new hearing tests.
+* **Configurable Settings:** * Set custom **Break Durations** between test types.
+    * Once time play "Maximum Audio Plays" (e.g., allow student to hear the word only ones when clicking).
+    * No randomized question order, use the xlsx file order.
+* **Live Analytics:** Real-time view of student progress and results as they happen.
+
+### 🎓 Student Experience (Public)
+* **Guest Access:** Enter Name and Email to begin (Session-based, no password required).
+* **Test Selection:** Choose a specific test title from a dropdown.
+* **Hearing Engine:** * High-fidelity audio playback.
+    * No Arabic-specific input only slective options.
+    * **Segmented Progress Bar:** Visualizing progress through different "Test Types."
+* **Intermission Logic:** Automatic "Break Time" screens with countdown timers between sections.
+
+---
+
+## 📊 Database Schema (Convex)
+
+### `tests`
+* `teacherId`: string (Clerk ID)
+* `title`: string
+* `breakDuration`: number (seconds)
+* `settings`: object (randomize, maxPlays, etc.)
+
+### `questions`
+* `testId`: id
+* `type`: string (e.g., "Phoneme", "Word Recognition")
+* `audioUrl`: string
+* `correctAnswer`: string
+* `options`: string[] (for MCQ)
+
+### `submissions`
+* `studentName`: string
+* `studentEmail`: string
+* `testId`: id
+* `answers`: array of { questionId, response, isCorrect, timeTaken }
+* `durations`: array of times
+* `status`: "in-progress" | "completed"
+
+---
+
+## 📂 Project Structure
+
+```text
+├── src/
+│   ├── app/                # Next.js App Router (Pages & Layouts)
+│   │   ├── (admin)/        # Protected routes for teachers
+│   │   ├── (student)/      # Public testing routes
+│   │   └── api/            # Webhooks or specialized endpoints
+│   ├── globals.css         # Tailwindcss global style
+│   ├── layout.tsx          # Next global layout
+│   ├── page.tsx            # Next global page
+│   ├── components/         # Reusable UI (AudioPlayer, ProgressBar, Timer)
+│   ├── lib/                # Utilities (Excel parsing logic)
+│   └── hooks/              # Custom React hooks
+├── convex/                 # Convex backend functions (Queries & Mutations)
+│   ├── schema.ts           # Database definitions
+│   ├── tests.ts            # CRUD for tests
+│   └── trails.ts           # The Individual Trials (Parsed from the Excel sheet)
+│   └── responses.ts        # The Answers (Recorded instantly after every question)
+│   └── submissions.ts      # Student response handling
+└── public/                 # Static assets (logos, icons)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Experiment lists             
+Study	Task	Trials	Manual sheet	Correct answer included?	Notes
+Emphatic	Identification	48	Yes	Yes	2 repetitions; word-initial only
+Emphatic	Same-Different	96	Yes	Yes	2 repetitions; balanced patterns
+Emphatic	AXB	96	Yes	Yes	2 repetitions; balanced patterns
+Guttural	Identification	48	Yes	Yes	2 repetitions; word-initial only
+Guttural	Same-Different	96	Yes	Yes	2 repetitions; balanced patterns
+Guttural	AXB	96	Yes	Yes	2 repetitions; balanced patterns
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Module	Task Type	Progress Bar Segment
+Module 1: Emphatic,Identification → Same-Diff → AXB,0% ————— 50%
+Module 2: Guttural,Identification → Same-Diff → AXB,50% ———— 100%
