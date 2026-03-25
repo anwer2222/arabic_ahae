@@ -163,10 +163,10 @@ export default function TestExecutionPage({ params }: PageProps) {
           audioRef.current.onerror = () => reject(new Error(`تعذر العثور على: ${fileName}`));
         });
 
-        // Inter-Stimulus Interval (ISI) - 500ms gap between sounds
+        // Inter-Stimulus Interval (ISI) - 1000ms gap between sounds
         if (i < files.length - 1) {
           setActiveAudioIndex(null); 
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
 

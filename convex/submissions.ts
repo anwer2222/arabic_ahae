@@ -47,7 +47,7 @@ export const start = mutation({
 export const complete = mutation({
   args: { submissionId: v.id("submissions") },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.submissionId, { status: "completed" });
+    await ctx.db.patch(args.submissionId, { status: "completed",completedAt: Date.now()});
   },
 });
 
