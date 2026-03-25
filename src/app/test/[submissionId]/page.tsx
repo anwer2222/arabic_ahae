@@ -88,6 +88,9 @@ export default function TestExecutionPage({ params }: PageProps) {
   const currentTrial = testData?.trials[currentIndex];
 
   useEffect(() => {
+    // التعديل 1: لا تحاول تحميل الصوت إذا كنا في شاشة الراحة
+    if (isBreak) return;
+
     if (currentTrial && audioRef.current && !isPlaying && currentTrial.audioFiles?.length > 0) {
       setIsReadyToPlay(false);
       const firstFile = currentTrial.audioFiles[0];
@@ -98,7 +101,8 @@ export default function TestExecutionPage({ params }: PageProps) {
       audioRef.current.src = `/audio/${moduleFolder}/${fileName}`;
       audioRef.current.load();
     }
-  }, [currentTrial, testData?.module, isPlaying]);
+  // التعديل 2: إضافة isBreak هنا لكي يعمل الكود مجدداً فور انتهاء الراحة
+  }, [currentTrial, testData?.module, isPlaying, isBreak]);
 
   // ------------------------------------------------------------------
   // D. Loading & Success Screens
