@@ -63,6 +63,8 @@ export default function ResultsPage({ params }: PageProps) {
     };
   });
 
+  
+
   // 6. Export OVERALL Results to Excel
   const exportOverallToExcel = () => {
     const exportData = processedResults.map((res) => ({
@@ -85,18 +87,33 @@ export default function ResultsPage({ params }: PageProps) {
 
   // 7. NEW: Export INDIVIDUAL Student Results to Excel
   const exportIndividualData = (studentSubmission: typeof processedResults[0]) => {
-    const exportData = studentSubmission.responses.map((res, index) => {
+    const exportData1 = studentSubmission.responses.map((res, index) => {
       const trial = trialsMap.get(res.trialId);
       const isCorrect = res.studentAnswer === trial?.correctAnswer;
 
       return {
         "رقم المحاولة": trial?.trialNumber || index + 1,
-        "الملف الصوتي": trial?.driveFileId || "غير معروف",
+        "الملف الصوتي": trial?.audioFiles || "غير معروف",
         "إجابة الطالب": res.studentAnswer,
         "الإجابة الصحيحة": trial?.correctAnswer || "غير متوفر",
         "النتيجة": isCorrect ? "صحيحة (1)" : "خاطئة (0)",
         "وقت الاستجابة (ms)": res.responseTimeMs,
       };
+    });
+
+    // Inside exportIndividualData in ResultsPage
+    const exportData = studentSubmission.responses.map((res) => {
+        const trial = trialsMap.get(res.trialId);
+        return {
+        "رقم المحاولة": trial?.trialNumber,
+        "الزوج اللغوي": trial?.pair,
+        "الحركة (Vowel)": trial?.vowel,
+        "الملفات الصوتية": trial?.audioFiles.join(" - "), // e.g. "emph_015.wav - emph_015.wav - emph_004.wav"
+        "إجابة الطالب": res.studentAnswer,
+        "الإجابة الصحيحة": trial?.correctAnswer,
+        "النتيجة": res.studentAnswer === trial?.correctAnswer ? "1" : "0",
+        "وقت الاستجابة (ms)": res.responseTimeMs,
+        };
     });
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -107,6 +124,7 @@ export default function ResultsPage({ params }: PageProps) {
     const safeName = studentSubmission.studentName.replace(/[^a-z0-9\u0600-\u06FF]/gi, '_');
     XLSX.writeFile(workbook, `${safeName}_Detailed_Results.xlsx`);
   };
+  
 
   // 8. Render UI
   return (

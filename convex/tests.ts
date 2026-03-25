@@ -83,9 +83,11 @@ export const createTestWithTrials = mutation({
       trials: v.array(
         v.object({
           trialNumber: v.number(),
-          driveFileId: v.string(),
+          audioFiles: v.array(v.string()),
           correctAnswer: v.string(),
           options: v.optional(v.array(v.string())),
+          pair: v.string(),
+          vowel: v.string(),
         })
       ),
     },
@@ -109,9 +111,11 @@ export const createTestWithTrials = mutation({
           ctx.db.insert("trials", {
             testId,
             trialNumber: trial.trialNumber,
-            driveFileId: trial.driveFileId,
+            audioFiles: trial.audioFiles,
             correctAnswer: trial.correctAnswer,
             options: trial.options,
+            pair: trial.pair,
+            vowel: trial.vowel,
           })
         )
       );

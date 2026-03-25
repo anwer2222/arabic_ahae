@@ -18,14 +18,17 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_teacher", ["teacherId"]),
 
-  // 2. The Individual Trials (Parsed from the Excel sheet)
+  // Add/Update this in convex/schema.ts
   trials: defineTable({
     testId: v.id("tests"),
     trialNumber: v.number(),
-    // We store the unique Google Drive File ID here
-    driveFileId: v.string(), 
-    correctAnswer: v.string(), 
+    // We change driveFileId to audioFiles to support 1, 2, or 3 sounds
+    audioFiles: v.array(v.string()), 
+    correctAnswer: v.string(),
     options: v.optional(v.array(v.string())),
+    // Optional: Add metadata for research analysis
+    pair: v.optional(v.string()), 
+    vowel: v.optional(v.string()),
   }).index("by_test", ["testId"]),
 
   // 3. The Student's Testing Session (Created when they enter Name/Email)

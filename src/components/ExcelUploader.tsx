@@ -65,7 +65,7 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
       if (jsonData.length === 0) throw new Error("ورقة العمل المحددة فارغة.");
 
       // 2. تجهيز الأسئلة (Trials) باستخدام اسم الملف مباشرة
-      const trials = jsonData.map((row, index) => {
+      const trials1 = jsonData.map((row, index) => {
         // البحث عن اسم الملف في الأعمدة الشائعة في الإكسل
         const fileName = String(row["Audio File Name"] || row["Audio"] || row["File"] || "").trim();
         
@@ -77,6 +77,40 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
           driveFileId: fileName, // نمرر اسم الملف مباشرة (مثل emp_001.wav)
           correctAnswer: String(row["Answer"] || row["Correct"] || "").trim(),
           options: options.length > 0 ? options : undefined,
+        };
+      });
+
+      // Inside handleSubmit in ExcelUploader.tsx
+      const trials = jsonData.map((row, index) => {
+        let audioFiles: string[] = [];
+        const optionsStr = String(row["Options"] || row["Choices"] || "");
+        let options: string[] = optionsStr ? optionsStr.split(",").map(s => s.trim()) : [];
+    
+        if (taskType === "Identification") {
+        audioFiles = [String(row["Audio File Name"] || row["Audio"] || "").trim()];
+        } else if (taskType === "Same-Different") {
+            audioFiles = [
+                String(row["Audio 1"] || "").trim(),
+                String(row["Audio 2"] || "").trim()
+            ];
+            options = ["متماثل", "مختلف"] 
+        } else if (taskType === "AXB") {
+            audioFiles = [
+                String(row["Audio A"] || "").trim(),
+                String(row["Audio X"] || "").trim(),
+                String(row["Audio B"] || "").trim()
+            ];
+            options = ["الأول", "الثالث"]
+        }
+    
+        return {
+        trialNumber: index + 1,
+        audioFiles, // Save as array
+        correctAnswer: String(row["Correct"] || row["Answer"] || "").trim(),
+        options: options,
+        // Additional research metadata
+        pair: String(row["Pair"] || ""),
+        vowel: String(row["Vowel"] || ""),
         };
       });
 
