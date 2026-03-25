@@ -313,7 +313,7 @@ export default function TestExecutionPage({ params }: PageProps) {
                   <span className="text-3xl">{isPlaying ? "⏳" : audioEndedAt ? "✓" : "▶"}</span>
                   {isPlaying && currentTrial && currentTrial.audioFiles.length > 1 && (
                     <span className="text-[11px] mt-1 font-bold">
-                      {activeAudioIndex !== null ? `صوت ${activeAudioIndex + 1}` : "فصل..."}
+                      {activeAudioIndex !== null ? `صوت ${activeAudioIndex + 1}` : "..."}
                     </span>
                   )}
                 </button>
