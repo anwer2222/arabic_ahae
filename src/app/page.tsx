@@ -6,8 +6,8 @@ import HomePage from "@/components/home_page";
 export default function Home() {
 
   return (
-    <ConvexClientProvider>
+    // <ConvexClientProvider>
       <HomePage/>
-    </ConvexClientProvider>
+    // </ConvexClientProvider>
   );
 }

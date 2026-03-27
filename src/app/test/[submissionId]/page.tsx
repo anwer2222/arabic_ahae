@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, use } from "react";
+import { useState, useRef, useEffect, use, ReactNode } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -28,9 +28,7 @@ export default function TestExecutionPage({ params }: PageProps) {
   const testData = useQuery(api.tests.getTestWithTrials, 
     isSuccessRoute || !submission ? "skip" : { testId: submission.testId }
   );
-  const answersCount = useQuery(api.responses.getAnswersCount, 
-    isSuccessRoute ? "skip" : { submissionId }
-  );
+  const answersCount = useQuery(api.responses.getAnswersCount, { submissionId });
   
   const saveAnswer = useMutation(api.responses.saveAnswer);
   const completeSession = useMutation(api.submissions.complete);
@@ -83,12 +81,12 @@ export default function TestExecutionPage({ params }: PageProps) {
   }, [isBreak, breakTimeLeft]);
 
   // ------------------------------------------------------------------
-  // C. Audio Preloader (Ensures the first file is ready)
+  // C. Audio Preloader (Fixed with isBreak handling)
   // ------------------------------------------------------------------
   const currentTrial = testData?.trials[currentIndex];
 
   useEffect(() => {
-    // التعديل 1: لا تحاول تحميل الصوت إذا كنا في شاشة الراحة
+    // If we are in break mode, don't try loading audio
     if (isBreak) return;
 
     if (currentTrial && audioRef.current && !isPlaying && currentTrial.audioFiles?.length > 0) {
@@ -101,7 +99,7 @@ export default function TestExecutionPage({ params }: PageProps) {
       audioRef.current.src = `/audio/${moduleFolder}/${fileName}`;
       audioRef.current.load();
     }
-  // التعديل 2: إضافة isBreak هنا لكي يعمل الكود مجدداً فور انتهاء الراحة
+  // isBreak added here so audio loads immediately when break ends
   }, [currentTrial, testData?.module, isPlaying, isBreak]);
 
   // ------------------------------------------------------------------
@@ -134,7 +132,7 @@ export default function TestExecutionPage({ params }: PageProps) {
   }
 
   // ------------------------------------------------------------------
-  // E. Sequence Player Logic (The Core Engine)
+  // E. Sequence Player Logic
   // ------------------------------------------------------------------
   const playSequence = async () => {
     if (!audioRef.current || !isReadyToPlay || isPlaying || !currentTrial) return;
@@ -149,8 +147,8 @@ export default function TestExecutionPage({ params }: PageProps) {
     try {
       for (let i = 0; i < files.length; i++) {
         setActiveAudioIndex(i);
-        
-        const fileName = files[i].endsWith('.wav') ? files[i] : `${files[i]}.wav`;
+        const firstFile = currentTrial.audioFiles[0];
+        const fileName = files[i].endsWith('.wav') ? files[i] : `${firstFile}.wav`;
         audioRef.current.src = `/audio/${moduleFolder}/${fileName}`;
         audioRef.current.load();
 
@@ -163,17 +161,17 @@ export default function TestExecutionPage({ params }: PageProps) {
           audioRef.current.onerror = () => reject(new Error(`تعذر العثور على: ${fileName}`));
         });
 
-        // Inter-Stimulus Interval (ISI) - 1000ms gap between sounds
+        // Inter-Stimulus Interval (ISI) - 500ms gap between sounds
         if (i < files.length - 1) {
           setActiveAudioIndex(null); 
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
 
       // Sequence complete
       setIsPlaying(false);
       setActiveAudioIndex(null);
-      setAudioEndedAt(Date.now()); // Start the reaction time clock exactly here
+      setAudioEndedAt(Date.now()); // START REACTION TIME CLOCK Exactly Here
 
     } catch (err: any) {
       console.error("Sequence Playback Error:", err);
@@ -222,14 +220,46 @@ export default function TestExecutionPage({ params }: PageProps) {
   };
 
   // ------------------------------------------------------------------
-  // G. Render UI
+  // G. Dynamic UI Helper: Determine content and design based on test type
+  // ------------------------------------------------------------------
+  
+  // Logic to map the backend 'option' text to an Icon or Digit
+  const getDisplayContent = (option: string): ReactNode => {
+    if (testData.taskType === "Same-Different") {
+      if (option === "متماثل") return <span className="text-7xl">✓</span>;
+      if (option === "مختلف") return <span className="text-7xl">✗</span>;
+    }
+    if (testData.taskType === "AXB") {
+      if (option === "الأول") return <span className="font-mono font-black text-8xl">1</span>;
+      if (option === "الثالث") return <span className="font-mono font-black text-8xl">3</span>;
+    }
+    // Identification tasks (Words or letters)
+    return <span className="text-3xl font-bold">{option}</span>;
+  };
+
+  // Logic to map specific task types to custom circular designs
+  const getButtonDesignClasses = (option: string): string => {
+    if (testData.taskType === "Same-Different") {
+      return option === "متماثل"
+        ? "bg-green-100 text-green-700 border-4 border-green-500 hover:bg-green-200"
+        : "bg-red-100 text-red-700 border-4 border-red-500 hover:bg-red-200";
+    }
+    if (testData.taskType === "AXB") {
+      return "bg-primary text-primary-foreground border-4 border-border";
+    }
+    // Identification design (Circular now)
+    return "bg-primary text-primary-foreground border-4 border-primary/50 hover:bg-primary/90";
+  };
+
+  // ------------------------------------------------------------------
+  // H. Render UI
   // ------------------------------------------------------------------
   if (isBreak) {
     const minutes = Math.floor(breakTimeLeft / 60);
     const seconds = breakTimeLeft % 60;
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 text-foreground">
-        <div className="bg-card text-card-foreground p-8 rounded-xl shadow-lg border border-border text-center max-w-md w-full">
+        <div className="bg-card text-card-foreground p-8 rounded-xl shadow-lg border border-border text-center max-md w-full">
           <h2 className="text-2xl font-bold mb-4">وقت مستقطع لإراحة السمع</h2>
           <p className="text-muted-foreground mb-6">يرجى إراحة أذنيك لبضع ثوانٍ قبل المتابعة.</p>
           <div className="text-5xl font-mono text-primary font-bold mb-8" dir="ltr">
@@ -245,7 +275,7 @@ export default function TestExecutionPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col items-center pt-20 p-6 bg-background text-foreground">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-3xl">
         
         {/* Progress Bar */}
         <div className="mb-8">
@@ -259,9 +289,9 @@ export default function TestExecutionPage({ params }: PageProps) {
         </div>
 
         {/* Question Card */}
-        <div className="bg-card text-card-foreground border border-border rounded-xl shadow-lg p-8 text-center relative overflow-hidden min-h-[400px] flex flex-col justify-center">
+        <div className="bg-card text-card-foreground border border-border rounded-xl shadow-lg p-10 text-center relative overflow-hidden min-h-[450px] flex flex-col justify-center">
           
-          <h2 className="text-xl font-bold mb-6">استمع بعناية ثم اختر الإجابة الصحيحة</h2>
+          <h2 className="text-xl font-bold mb-12">استمع بعناية ثم اختر الإجابة الصحيحة</h2>
           
           {/* Hidden Audio Tag */}
           <audio 
@@ -276,66 +306,91 @@ export default function TestExecutionPage({ params }: PageProps) {
             </div>
           )}
 
-          {/* Sequence Indicators (Dots) */}
-          {currentTrial && currentTrial.audioFiles.length > 1 && (
-            <div className="flex justify-center gap-3 mb-6 h-4 items-center">
-              {currentTrial.audioFiles.map((_, idx) => (
-                <div 
-                  key={idx}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                    activeAudioIndex === idx ? "bg-primary scale-150 shadow-md" : "bg-secondary"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Play Button */}
-          <div className="mb-10 flex flex-col items-center justify-center min-h-[140px]">
+          {/* Player Section */}
+          <div className="mb-14 flex flex-col items-center justify-center min-h-[120px]">
             {!isReadyToPlay && !audioError && audioEndedAt === null ? (
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p className="text-sm text-muted-foreground font-medium">جاري تحضير المقطع...</p>
               </div>
             ) : (
-              <>
+              <div className="relative">
+                {/* Sequence Indicators (Dots) */}
+                {currentTrial && currentTrial.audioFiles.length > 1 && (
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex justify-center gap-3 h-4 items-center">
+                    {currentTrial.audioFiles.map((_, idx) => (
+                      <div 
+                        key={idx}
+                        className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                          activeAudioIndex === idx ? "bg-primary scale-150 shadow-md" : "bg-secondary"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+                
                 <button
                   onClick={playSequence}
                   disabled={isPlaying || audioEndedAt !== null}
-                  className={`w-28 h-28 rounded-full flex flex-col items-center justify-center mx-auto transition-all shadow-md ${
+                  className={`w-24 h-24 rounded-full flex flex-col items-center justify-center mx-auto transition-all shadow-md ${
                     isPlaying 
-                      ? "bg-accent text-accent-foreground" 
+                      ? "bg-accent text-accent-foreground animate-pulse" 
                       : audioEndedAt 
                         ? "bg-secondary text-secondary-foreground cursor-not-allowed opacity-50"
                         : "bg-primary text-primary-foreground hover:scale-105 hover:shadow-lg"
                   }`}
                 >
-                  <span className="text-3xl">{isPlaying ? "⏳" : audioEndedAt ? "✓" : "▶"}</span>
+                  <span className="text-3xl">{isPlaying ? "⏳" : audioEndedAt ? "؟" : "▶"}</span>
                   {isPlaying && currentTrial && currentTrial.audioFiles.length > 1 && (
                     <span className="text-[11px] mt-1 font-bold">
-                      {activeAudioIndex !== null ? `صوت ${activeAudioIndex + 1}` : "..."}
+                      {activeAudioIndex !== null ? `${activeAudioIndex + 1}` : "..."}
                     </span>
                   )}
                 </button>
-                <p className="text-sm text-muted-foreground mt-4 h-5 font-medium">
-                  {isPlaying ? "جاري التشغيل..." : audioEndedAt ? "حدد إجابتك الآن" : "جاهز! اضغط للتشغيل"}
-                </p>
-              </>
+              </div>
             )}
           </div>
 
-          {/* Options Grid */}
-          <div className={`grid gap-4 transition-opacity duration-300 ${!audioEndedAt ? "opacity-30 pointer-events-none" : "opacity-100"}`}>
-            {currentTrial?.options?.map((option, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleAnswer(option)}
-                disabled={isSubmitting || !audioEndedAt}
-                className="w-full bg-background border-2 border-border text-foreground text-xl py-4 rounded-lg hover:border-primary hover:bg-accent hover:text-accent-foreground transition-all disabled:opacity-50 font-semibold"
-              >
-                {option}
-              </button>
-            ))}
+          {/* Options Grid (ALWAYS Horizontal and Circular) */}
+          <div className={`transition-opacity duration-300 ${!audioEndedAt ? "pointer-events-none" : "opacity-100"}`}>
+            <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-20">
+              {currentTrial?.options?.map((option, idx) => {
+                const designClasses = getButtonDesignClasses(option);
+                const displayContent = getDisplayContent(option);
+
+                // --- Dynamic AXB Highlighting Logic ---
+                let activeHighlight = "";
+                
+                if (testData.taskType === "AXB" && !audioEndedAt) {
+                  if (option === "الأول" && activeAudioIndex === 0) {
+                    activeHighlight = "ring-8 ring-primary/60 scale-110 opacity-100 shadow-2xl z-10";
+                  } else if (option === "الثالث" && activeAudioIndex === 2) {
+                    activeHighlight = "ring-8 ring-primary/60 scale-110 opacity-100 shadow-2xl z-10";
+                  } else {
+                    activeHighlight = "opacity-30 grayscale"; 
+                  }
+                } else if (!audioEndedAt) {
+                  activeHighlight = "opacity-30";
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleAnswer(option)}
+                    disabled={isSubmitting || !audioEndedAt}
+                    // All buttons are now w-32 h-32 or w-36 h-36 rounded-full
+                    className={`transition-all duration-300 ${designClasses} ${activeHighlight} w-32 h-32 sm:w-36 sm:h-36 rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-100 disabled:opacity-50`}
+                    title={`اختيار ${option}`}
+                  >
+                    {displayContent}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <p className="text-sm text-muted-foreground mt-12 font-medium">
+              {!isReadyToPlay ? "جاري الاتصال..." : isPlaying ? "جاري التشغيل..." : audioEndedAt ? "حدد إجابتك الآن" : "جاهز! اضغط للتشغيل"}
+            </p>
           </div>
           
         </div>
