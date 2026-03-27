@@ -80,6 +80,8 @@ export const createTestWithTrials = mutation({
         v.literal("AXB")
       ),
       breakDuration: v.number(),
+      gapTimeBefore: v.number(),
+      gapTimeAfter: v.number(),
       trials: v.array(
         v.object({
           trialNumber: v.number(),
@@ -103,6 +105,8 @@ export const createTestWithTrials = mutation({
         taskType: args.taskType,
         totalTrials: args.trials.length,
         breakDuration: args.breakDuration,
+        gapTimeAfter: args.gapTimeAfter,
+        gapTimeBefore: args.gapTimeBefore,
         createdAt: Date.now(),
       });
   

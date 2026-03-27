@@ -28,7 +28,10 @@ export default function TestExecutionPage({ params }: PageProps) {
   const testData = useQuery(api.tests.getTestWithTrials, 
     isSuccessRoute || !submission ? "skip" : { testId: submission.testId }
   );
-  const answersCount = useQuery(api.responses.getAnswersCount, { submissionId });
+
+  const answersCount = useQuery(api.responses.getAnswersCount, 
+    isSuccessRoute ? "skip" : { submissionId }
+  );
   
   const saveAnswer = useMutation(api.responses.saveAnswer);
   const completeSession = useMutation(api.submissions.complete);
@@ -144,11 +147,17 @@ export default function TestExecutionPage({ params }: PageProps) {
     const files = currentTrial.audioFiles;
     const moduleFolder = testData.module.toLowerCase();
 
+    // --- NEW: Calculate the dynamic gap time based on current progress ---
+    const halfWayPoint = Math.floor(testData.trials.length / 2);
+    const currentGapTime = currentIndex < halfWayPoint 
+      ? testData.gapTimeBefore 
+      : testData.gapTimeAfter;
+
     try {
       for (let i = 0; i < files.length; i++) {
         setActiveAudioIndex(i);
-        const firstFile = currentTrial.audioFiles[0];
-        const fileName = files[i].endsWith('.wav') ? files[i] : `${firstFile}.wav`;
+        
+        const fileName = files[i].endsWith('.wav') ? files[i] : `${files[i]}.wav`;
         audioRef.current.src = `/audio/${moduleFolder}/${fileName}`;
         audioRef.current.load();
 
@@ -161,24 +170,24 @@ export default function TestExecutionPage({ params }: PageProps) {
           audioRef.current.onerror = () => reject(new Error(`تعذر العثور على: ${fileName}`));
         });
 
-        // Inter-Stimulus Interval (ISI) - 500ms gap between sounds
+        // Inter-Stimulus Interval (ISI) - Use the dynamic currentGapTime
         if (i < files.length - 1) {
           setActiveAudioIndex(null); 
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, currentGapTime));
         }
       }
 
       // Sequence complete
       setIsPlaying(false);
       setActiveAudioIndex(null);
-      setAudioEndedAt(Date.now()); // START REACTION TIME CLOCK Exactly Here
+      setAudioEndedAt(Date.now()); 
 
     } catch (err: any) {
       console.error("Sequence Playback Error:", err);
       setAudioError(err.message || "حدث خطأ أثناء تشغيل التتابع الصوتي.");
       setIsPlaying(false);
       setActiveAudioIndex(null);
-      setAudioEndedAt(Date.now()); // Enable buttons as a fallback
+      setAudioEndedAt(Date.now()); 
     }
   };
 

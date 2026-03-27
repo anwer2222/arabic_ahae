@@ -15,6 +15,8 @@ export default defineSchema({
     ),
     totalTrials: v.number(),
     breakDuration: v.number(),
+    gapTimeBefore: v.number(), 
+    gapTimeAfter: v.number(),
     createdAt: v.number(),
   }).index("by_teacher", ["teacherId"]),
 

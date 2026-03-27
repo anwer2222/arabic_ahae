@@ -18,6 +18,8 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
   const [module, setModule] = useState<"Emphatic" | "Guttural">("Emphatic");
   const [taskType, setTaskType] = useState<"Identification" | "Same-Different" | "AXB">("Identification");
   const [breakDuration, setBreakDuration] = useState(120);
+  const [gapTimeBefore, setGapTimeBefore] = useState(800);
+  const [gapTimeAfter, setGapTimeAfter] = useState(400);
   const [isPublished, setIsPublished] = useState(true);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -121,6 +123,8 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
         module,
         taskType,
         breakDuration,
+        gapTimeBefore,
+        gapTimeAfter,
         trials,
       });
 
@@ -175,13 +179,30 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
                 </select>
               </div>
 
+              {/* مفتاح تبديل حالة النشر (Toggle) */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-accent-foreground">وقت الراحة (بالثواني)</label>
-                <input 
-                  type="number" min="0" value={breakDuration} onChange={(e) => setBreakDuration(Number(e.target.value))}
-                  className="w-full border border-border p-2.5 rounded-md bg-input text-accent-foreground"
-                  title="الوقت المستقطع بعد منتصف الاختبار (ضع 0 لإلغائه)"
-                />
+                <label className="block text-sm font-medium mb-1 text-accent-foreground"> حالة الاختبار (Test Status)</label>
+                <div className="flex items-center justify-between bg-muted/30 p-3.5 rounded-md mb-4 h-9 border border-border">
+                  <strong className={isPublished ? "text-green-600" : "text-muted-foreground"}>
+                      {isPublished ? "متاح للطلاب (منشور)" : "مخفي (مسودة)"}
+                    </strong>
+                  
+                  <button
+                    type="button" // هذا السطر هو السحر الذي يمنع إرسال النموذج (Form Submit)
+                    onClick={() => setIsPublished(!isPublished)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background cursor-pointer ${
+                      isPublished ? 'bg-green-500' : 'bg-secondary'
+                    }`}
+                    dir="ltr"
+                    aria-pressed={isPublished}
+                    >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out shadow-sm ${
+                        isPublished ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -208,6 +229,38 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
                   <option value="AXB">مقارنة (AXB)</option>
                 </select>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-accent-foreground">وقت الراحة (بالثواني)</label>
+                <input 
+                  type="number" min="0" value={breakDuration} onChange={(e) => setBreakDuration(Number(e.target.value))}
+                  className="w-full border border-border p-2.5 rounded-md bg-input text-accent-foreground"
+                  title="الوقت المستقطع بعد منتصف الاختبار (ضع 0 لإلغائه)"
+                />
+              </div>
+
+              {/* New Row for ISI (Gap Times) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-accent-foreground">وقت الفصل قبل الاستراحة (ms)</label>
+                <input 
+                  type="number" min="0" step="50" 
+                  value={gapTimeBefore} onChange={(e) => setGapTimeBefore(Number(e.target.value))}
+                  className="w-full border border-border p-2.5 rounded-md bg-input text-accent-foreground"
+                  title="الفاصل الزمني بين الأصوات في النصف الأول من الاختبار (بالميلي ثانية)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-accent-foreground">وقت الفصل بعد الاستراحة (ms)</label>
+                <input 
+                  type="number" min="0" step="50" 
+                  value={gapTimeAfter} onChange={(e) => setGapTimeAfter(Number(e.target.value))}
+                  className="w-full border border-border p-2.5 rounded-md bg-input text-accent-foreground"
+                  title="الفاصل الزمني بين الأصوات في النصف الثاني من الاختبار (بالميلي ثانية)"
+                />
+              </div>
+            </div>
             </div>
 
             {/* زر الحفظ */}
