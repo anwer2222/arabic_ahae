@@ -1,13 +1,10 @@
 "use client";
 
-import { ConvexClientProvider } from "./convexClientProvider";
-import HomePage from "@/components/home_page";
+import HomePage from "@/components/HomePage";
 
 export default function Home() {
 
   return (
-    // <ConvexClientProvider>
       <HomePage/>
-    // </ConvexClientProvider>
   );
 }

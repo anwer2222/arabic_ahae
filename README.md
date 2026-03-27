@@ -97,3 +97,9 @@ Guttural	AXB	96	Yes	Yes	2 repetitions; balanced patterns
 Module	Task Type	Progress Bar Segment
 Module 1: Emphatic,Identification → Same-Diff → AXB,0% ————— 50%
 Module 2: Guttural,Identification → Same-Diff → AXB,50% ———— 100%
+
+## Style
+
+A universal style from:
+https://tweakcn.com/editor/theme
+Default: Amber Minimal

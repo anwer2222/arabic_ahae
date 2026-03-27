@@ -170,6 +170,18 @@
   body {
     @apply bg-background text-foreground;
   }
+  h2 {
+    color: var(--secondary-foreground); /* Replace with your desired Tailwind color */
+  }
+  li {
+    color: var(--accent-foreground)
+  }
+  th {
+    color: var(--accent-foreground);
+  }
+  td {
+    color: var(--secondary-foreground);
+  }
 }
 
 @media (prefers-color-scheme: dark) {

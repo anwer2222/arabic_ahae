@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
+import StudentInstructions from "@/components/StudentInstructions";
 
 interface PageProps {
   params: Promise<{ submissionId: string }>;
@@ -52,23 +53,21 @@ export default function TestExecutionPage({ params }: PageProps) {
   const [isBreak, setIsBreak] = useState(false);
   const [breakTimeLeft, setBreakTimeLeft] = useState(0);
 
+  const [showInstructions, setShowInstructions] = useState(true);
+
   // ------------------------------------------------------------------
   // A. Auto-Resume Logic
   // ------------------------------------------------------------------
   useEffect(() => {
     if (answersCount !== undefined && currentIndex === -1) {
       setCurrentIndex(answersCount);
+      
+      // NEW: Automatically hide instructions if the student is resuming a test
+      if (answersCount > 0) {
+        setShowInstructions(false);
+      }
     }
   }, [answersCount, currentIndex]);
-
-  // Fallback if student enters an already completed test
-  useEffect(() => {
-    if (currentIndex !== -1 && testData && currentIndex >= testData.trials.length) {
-      completeSession({ submissionId }).then(() => {
-        router.replace("/test/success");
-      });
-    }
-  }, [currentIndex, testData, router, completeSession, submissionId]);
 
   // ------------------------------------------------------------------
   // B. Break Timer Logic
@@ -84,13 +83,13 @@ export default function TestExecutionPage({ params }: PageProps) {
   }, [isBreak, breakTimeLeft]);
 
   // ------------------------------------------------------------------
-  // C. Audio Preloader (Fixed with isBreak handling)
+  // C. Audio Preloader
   // ------------------------------------------------------------------
   const currentTrial = testData?.trials[currentIndex];
 
   useEffect(() => {
-    // If we are in break mode, don't try loading audio
-    if (isBreak) return;
+    // 1. لا تحاول تحميل الصوت إذا كنا في وقت الراحة أو نعرض شاشة التعليمات
+    if (isBreak || showInstructions) return;
 
     if (currentTrial && audioRef.current && !isPlaying && currentTrial.audioFiles?.length > 0) {
       setIsReadyToPlay(false);
@@ -102,8 +101,8 @@ export default function TestExecutionPage({ params }: PageProps) {
       audioRef.current.src = `/audio/${moduleFolder}/${fileName}`;
       audioRef.current.load();
     }
-  // isBreak added here so audio loads immediately when break ends
-  }, [currentTrial, testData?.module, isPlaying, isBreak]);
+  // 2. إضافة showInstructions هنا لتشغيل الكود فور انتهاء التعليمات
+  }, [currentTrial, testData?.module, isPlaying, isBreak, showInstructions]);
 
   // ------------------------------------------------------------------
   // D. Loading & Success Screens
@@ -120,6 +119,16 @@ export default function TestExecutionPage({ params }: PageProps) {
           </button>
         </div>
       </div>
+    );
+  }
+
+  // Show instructions if they haven't answered any questions yet
+  if (testData && showInstructions && currentIndex === 0 && answersCount === 0) {
+    return (
+      <StudentInstructions 
+        taskType={testData.taskType} 
+        onStart={() => setShowInstructions(false)} 
+      />
     );
   }
 
