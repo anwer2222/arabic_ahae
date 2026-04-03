@@ -18,9 +18,9 @@ const PRACTICE_TRIALS: Record<string, any[]> = {
     { audioFiles: ["prac_kiib.wav"], options: ["ف", "ك"], correct: "ك" }
   ],
   "Same-Different": [
-    { audioFiles: ["prac_kuub.wav", "prac_kuub.wav"], options: ["متماثل", "مختلف"], correct: "متماثل" },
-    { audioFiles: ["prac_fiib.wav", "prac_kiib.wav"], options: ["متماثل", "مختلف"], correct: "مختلف" },
-    { audioFiles: ["prac_fab.wav", "prac_fab.wav"], options: ["متماثل", "مختلف"], correct: "متماثل" }
+    { audioFiles: ["prac_kuub.wav", "prac_kuub.wav"], options: ["متماثلان", "مختلفان"], correct: "متماثلان" },
+    { audioFiles: ["prac_fiib.wav", "prac_kiib.wav"], options: ["متماثلان", "مختلفان"], correct: "مختلفان" },
+    { audioFiles: ["prac_fab.wav", "prac_fab.wav"], options: ["متماثلان", "مختلفان"], correct: "متماثلان" }
   ],
   "AXB": [
     { audioFiles: ["prac_kiib.wav", "prac_fiib.wav", "prac_fiib.wav"], options: ["1", "3"], correct: "3" },
@@ -121,7 +121,7 @@ export default function StudentInstructions({ taskType, module, onStart }: Stude
   const getDisplayContent = (option: string): ReactNode => {
     if (taskType === "Same-Different") {
       if (option === "متماثل") return <span className="text-7xl">✓</span>;
-      if (option === "مختلف") return <span className="text-7xl">✗</span>;
+      if (option === "مختلفان") return <span className="text-7xl">✗</span>;
     }
     if (taskType === "AXB") {
       if (option === "الأول") return <span className="font-mono font-black text-8xl">1</span>;

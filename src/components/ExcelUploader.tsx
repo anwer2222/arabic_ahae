@@ -19,7 +19,7 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
   const [taskType, setTaskType] = useState<"Identification" | "Same-Different" | "AXB">("Identification");
   const [breakDuration, setBreakDuration] = useState(120);
   const [gapTimeBefore, setGapTimeBefore] = useState(800);
-  const [gapTimeAfter, setGapTimeAfter] = useState(400);
+  const [gapTimeAfter, setGapTimeAfter] = useState(800);
   const [isPublished, setIsPublished] = useState(true);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -95,7 +95,7 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
                 String(row["Audio 1"] || "").trim(),
                 String(row["Audio 2"] || "").trim()
             ];
-            options = ["متماثل", "مختلف"] 
+            options = ["متماثلان", "مختلفان"] 
         } else if (taskType === "AXB") {
             audioFiles = [
                 String(row["Audio A"] || "").trim(),

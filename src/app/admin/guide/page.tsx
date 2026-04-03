@@ -91,7 +91,7 @@ export default function TeacherGuidePage() {
                       <td className="p-2 border border-border">i</td>
                       <td className="p-2 border border-border" dir="ltr">emph_005.wav</td>
                       <td className="p-2 border border-border" dir="ltr">emph_013.wav</td>
-                      <td className="p-2 border border-border">مختلف</td>
+                      <td className="p-2 border border-border">مختلفان</td>
                     </tr>
                     <tr>
                       <td className="p-2 border border-border">2</td>
@@ -99,7 +99,7 @@ export default function TeacherGuidePage() {
                       <td className="p-2 border border-border">i</td>
                       <td className="p-2 border border-border" dir="ltr">emph_005.wav</td>
                       <td className="p-2 border border-border" dir="ltr">emph_005.wav</td>
-                      <td className="p-2 border border-border">متماثل</td>
+                      <td className="p-2 border border-border">متماثلان</td>
                     </tr>
                   </tbody>
                 </table>
@@ -142,11 +142,11 @@ export default function TeacherGuidePage() {
         {/* Section 3: Time Settings */}
         <section className="bg-card border border-border rounded-xl p-6 shadow-sm">
           <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-            <span>⏱️</span> الخطوة الثالثة: إعدادات الفواصل الزمنية (ISI)
+            <span>⏱️</span> الخطوة الثالثة: إعدادات الاختبار
           </h2>
           <p className="text-muted-foreground leading-relaxed pb-8">
-            أثناء رفع الإكسل، يمكنك تحديد <strong>وقت الفصل قبل الاستراحة</strong> و <strong>وقت الفصل بعد الاستراحة</strong>. 
-            هذا يتحكم في الفجوة الزمنية (بالميلي ثانية) بين الأصوات المتتالية في اختبارات (AXB) و (Same-Different). القيمة الافتراضية هي 800ms للنصف الأول، و 400ms للنصف الثاني لزيادة الصعوبة المعرفية.
+            أثناء رفع الإكسل، يمكنك تحديد <strong>إعدادات الاختبار</strong> و <strong>وقت الاستراحة</strong>. 
+            يمكن تحديد الخيارات التالية
           </p>
           <ol>
               <li>عنوان الاختبار: مثال - أصوات حلقية - المجموعة A</li>

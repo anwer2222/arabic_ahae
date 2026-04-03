@@ -270,8 +270,8 @@ export default function TestExecutionPage({ params }: PageProps) {
   // ------------------------------------------------------------------
   const getDisplayContent = (option: string): ReactNode => {
     if (testData.taskType === "Same-Different") {
-      if (option === "متماثل") return <span className="text-7xl">✓</span>;
-      if (option === "مختلف") return <span className="text-7xl">✗</span>;
+      if (option === "متماثلان") return <span className="text-7xl">✓</span>;
+      if (option === "مختلفان") return <span className="text-7xl">✗</span>;
     }
     if (testData.taskType === "AXB") {
       if (option === "الأول") return <span className="font-mono font-black text-8xl">1</span>;
@@ -282,7 +282,7 @@ export default function TestExecutionPage({ params }: PageProps) {
 
   const getButtonDesignClasses = (option: string): string => {
     if (testData.taskType === "Same-Different") {
-      return option === "متماثل"
+      return option === "متماثلان"
         ? "bg-green-100 text-green-700 border-4 border-green-500 hover:bg-green-200"
         : "bg-red-100 text-red-700 border-4 border-red-500 hover:bg-red-200";
     }
