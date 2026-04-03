@@ -191,7 +191,7 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
                     type="button" // هذا السطر هو السحر الذي يمنع إرسال النموذج (Form Submit)
                     onClick={() => setIsPublished(!isPublished)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background cursor-pointer ${
-                      isPublished ? 'bg-green-500' : 'bg-secondary'
+                      isPublished ? 'bg-primary' : 'bg-secondary'
                     }`}
                     dir="ltr"
                     aria-pressed={isPublished}

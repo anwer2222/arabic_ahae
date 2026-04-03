@@ -42,7 +42,7 @@ export default function TeacherGuidePage() {
           <div className="space-y-8">
             {/* Identification */}
             <div>
-              <h3 className="text-lg font-bold text-primary mb-2">1. اختبار التحديد (Identification)</h3>
+              <h3 className="text-lg font-bold text-primary mb-2">1. اختبار التعرف (Identification)</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-right text-sm border border-border">
                   <thead className="bg-muted">
@@ -60,7 +60,7 @@ export default function TeacherGuidePage() {
                       <td className="p-2 border border-border">1</td>
                       <td className="p-2 border border-border">س-ص</td>
                       <td className="p-2 border border-border">i</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_001.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_001.wav</td>
                       <td className="p-2 border border-border">تِيب, طِيب</td>
                       <td className="p-2 border border-border">طِيب</td>
                     </tr>
@@ -71,7 +71,7 @@ export default function TeacherGuidePage() {
 
             {/* Same-Different */}
             <div>
-              <h3 className="text-lg font-bold text-primary mb-2">2. اختبار التطابق والاختلاف (Same-Different)</h3>
+              <h3 className="text-lg font-bold text-primary mb-2">2. تعليمات اختبار التمييز (التماثل والاختلاف) (Same-Different)</h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-right text-sm border border-border">
                   <thead className="bg-muted">
@@ -89,16 +89,16 @@ export default function TeacherGuidePage() {
                       <td className="p-2 border border-border">1</td>
                       <td className="p-2 border border-border">س-ص</td>
                       <td className="p-2 border border-border">i</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_005.wav</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_013.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_005.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_013.wav</td>
                       <td className="p-2 border border-border">مختلف</td>
                     </tr>
                     <tr>
                       <td className="p-2 border border-border">2</td>
                       <td className="p-2 border border-border">س-ص</td>
                       <td className="p-2 border border-border">i</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_005.wav</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_005.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_005.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_005.wav</td>
                       <td className="p-2 border border-border">متماثل</td>
                     </tr>
                   </tbody>
@@ -127,9 +127,9 @@ export default function TeacherGuidePage() {
                       <td className="p-2 border border-border">1</td>
                       <td className="p-2 border border-border">س-ص</td>
                       <td className="p-2 border border-border">i</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_015.wav</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_015.wav</td>
-                      <td className="p-2 border border-border" dir="ltr">emp_004.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_015.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_015.wav</td>
+                      <td className="p-2 border border-border" dir="ltr">emph_004.wav</td>
                       <td className="p-2 border border-border">الأول</td>
                     </tr>
                   </tbody>

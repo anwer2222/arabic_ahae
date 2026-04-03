@@ -114,7 +114,7 @@ function DashboardContent() {
                     onClick={() => handleTogglePublish(test._id, test.isPublished)}
                     disabled={updatingId === test._id}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                      test.isPublished ? 'bg-green-500' : 'bg-gray-300'
+                      test.isPublished ? 'bg-primary' : 'bg-gray-500'
                     } ${updatingId === test._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     dir="ltr"
                   >
