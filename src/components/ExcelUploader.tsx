@@ -17,9 +17,9 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
   const [selectedSheet, setSelectedSheet] = useState("");
   const [module, setModule] = useState<"Emphatic" | "Guttural">("Emphatic");
   const [taskType, setTaskType] = useState<"Identification" | "Same-Different" | "AXB">("Identification");
-  const [breakDuration, setBreakDuration] = useState(120);
-  const [gapTimeBefore, setGapTimeBefore] = useState(800);
-  const [gapTimeAfter, setGapTimeAfter] = useState(800);
+  const [breakDuration, setBreakDuration] = useState(60);
+  const [gapTimeBefore, setGapTimeBefore] = useState(500);
+  const [gapTimeAfter, setGapTimeAfter] = useState(500);
   const [isPublished, setIsPublished] = useState(true);
 
   const [isUploading, setIsUploading] = useState(false);
