@@ -120,7 +120,7 @@ export default function StudentInstructions({ taskType, module, onStart }: Stude
   // ------------------------------------------------------------------
   const getDisplayContent = (option: string): ReactNode => {
     if (taskType === "Same-Different") {
-      if (option === "متماثل") return <span className="text-7xl">✓</span>;
+      if (option === "متماثلان") return <span className="text-7xl">✓</span>;
       if (option === "مختلفان") return <span className="text-7xl">✗</span>;
     }
     if (taskType === "AXB") {
@@ -132,7 +132,7 @@ export default function StudentInstructions({ taskType, module, onStart }: Stude
 
   const getButtonDesignClasses = (option: string): string => {
     if (taskType === "Same-Different") {
-      return option === "متماثل"
+      return option === "متماثلان"
         ? "bg-green-100 text-green-700 border-4 border-green-500"
         : "bg-red-100 text-red-700 border-4 border-red-500";
     }
