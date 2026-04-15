@@ -174,32 +174,32 @@ export const startOrResume = mutation({
 });
 
 // Fetch all results for a specific test (Dashboard View)
+// convex/submissions.ts
 export const getTestResults = query({
   args: { testId: v.id("tests") },
   handler: async (ctx, args) => {
-    // 1. Get the Test
     const test = await ctx.db.get(args.testId);
     if (!test) throw new Error("Test not found");
 
-    // 2. Get the Trials for this test (THIS IS THE FIX)
+    // USE INDEX
     const trials = await ctx.db
       .query("trials")
-      .filter((q) => q.eq(q.field("testId"), args.testId))
+      .withIndex("by_test", (q) => q.eq("testId", args.testId))
       .collect();
 
-    // 3. Get all Submissions for this Test
+    // USE INDEX
     const submissions = await ctx.db
       .query("submissions")
-      .filter((q) => q.eq(q.field("testId"), args.testId))
+      .withIndex("by_test", (q) => q.eq("testId", args.testId))
       .order("desc")
       .collect();
 
-    // 4. Get Responses for each Submission
     const submissionsWithResponses = await Promise.all(
       submissions.map(async (sub) => {
+        // USE INDEX
         const responses = await ctx.db
           .query("responses")
-          .filter((q) => q.eq(q.field("submissionId"), sub._id))
+          .withIndex("by_submission", (q) => q.eq("submissionId", sub._id))
           .collect();
 
         return {
@@ -210,7 +210,6 @@ export const getTestResults = query({
     );
 
     return {
-      // We merge the fetched trials into the test object here:
       test: { ...test, trials }, 
       submissions: submissionsWithResponses,
     };

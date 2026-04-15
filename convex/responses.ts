@@ -25,14 +25,16 @@ export const saveAnswer = mutation({
 });
 
 // دالة جديدة لحساب عدد الإجابات المسجلة لجلسة معينة
+// convex/responses.ts
 export const getAnswersCount = query({
-    args: { submissionId: v.id("submissions") },
-    handler: async (ctx, args) => {
-      const answers = await ctx.db
-        .query("responses")
-        .filter((q) => q.eq(q.field("submissionId"), args.submissionId))
-        .collect();
-        
-      return answers.length;
-    },
-});
+  args: { submissionId: v.id("submissions") },
+  handler: async (ctx, args) => {
+    const answers = await ctx.db
+      .query("responses")
+      // USE INDEX INSTEAD OF FILTER
+      .withIndex("by_submission", (q) => q.eq("submissionId", args.submissionId))
+      .collect();
+      
+    return answers.length;
+  },
+})

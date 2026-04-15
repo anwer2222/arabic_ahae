@@ -66,57 +66,71 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
 
       if (jsonData.length === 0) throw new Error("ورقة العمل المحددة فارغة.");
 
-      // 2. تجهيز الأسئلة (Trials) باستخدام اسم الملف مباشرة
-      const trials1 = jsonData.map((row, index) => {
-        // البحث عن اسم الملف في الأعمدة الشائعة في الإكسل
-        const fileName = String(row["Audio File Name"] || row["Audio"] || row["File"] || "").trim();
-        
-        const optionsStr = String(row["Options"] || row["Choices"] || "");
-        const options = optionsStr ? optionsStr.split(",").map(s => s.trim()) : [];
-
-        return {
-          trialNumber: Number(row["Trial"] || row["Question"] || index + 1),
-          driveFileId: fileName, // نمرر اسم الملف مباشرة (مثل emp_001.wav)
-          correctAnswer: String(row["Answer"] || row["Correct"] || "").trim(),
-          options: options.length > 0 ? options : undefined,
-        };
-      });
-
-      // Inside handleSubmit in ExcelUploader.tsx
-      const trials = jsonData.map((row, index) => {
+      // 2. تجهيز الأسئلة وفلترتها (Validation)
+      const trials = [];
+      
+      for (let index = 0; index < jsonData.length; index++) {
+        const row = jsonData[index];
         let audioFiles: string[] = [];
-        const optionsStr = String(row["Options"] || row["Choices"] || "");
-        let options: string[] = optionsStr ? optionsStr.split(",").map(s => s.trim()) : [];
-    
-        if (taskType === "Identification") {
-        audioFiles = [String(row["Audio File Name"] || row["Audio"] || "").trim()];
-        } else if (taskType === "Same-Different") {
-            audioFiles = [
-                String(row["Audio 1"] || "").trim(),
-                String(row["Audio 2"] || "").trim()
-            ];
-            options = ["متماثلان", "مختلفان"] 
-        } else if (taskType === "AXB") {
-            audioFiles = [
-                String(row["Audio A"] || "").trim(),
-                String(row["Audio X"] || "").trim(),
-                String(row["Audio B"] || "").trim()
-            ];
-            options = ["الأول", "الثالث"]
-        }
-    
-        return {
-        trialNumber: index + 1,
-        audioFiles, // Save as array
-        correctAnswer: String(row["Correct"] || row["Answer"] || "").trim(),
-        options: options,
-        // Additional research metadata
-        pair: String(row["Pair"] || ""),
-        vowel: String(row["Vowel"] || ""),
-        };
-      });
 
-      // 3. حفظ الاختبار والأسئلة في Convex
+        // أ. استخراج الملفات بناءً على نوع الاختبار
+        if (taskType === "Identification") {
+          audioFiles = [String(row["Audio File Name"] || row["Audio"] || row["File"] || "").trim()];
+        } else if (taskType === "Same-Different") {
+          audioFiles = [
+            String(row["Audio 1"] || "").trim(),
+            String(row["Audio 2"] || "").trim()
+          ];
+        } else if (taskType === "AXB") {
+          audioFiles = [
+            String(row["Audio A"] || "").trim(),
+            String(row["Audio X"] || "").trim(),
+            String(row["Audio B"] || "").trim()
+          ];
+        }
+
+        // ب. التحقق الصارم من صحة الملفات الصوتية (Validation)
+        // التأكد من عدم وجود أي ملف فارغ في المصفوفة المخصصة لهذا النوع
+        const hasEmptyAudio = audioFiles.some(file => file === "");
+        if (hasEmptyAudio) {
+          // نضيف 2 للفهرس (لأن المصفوفة تبدأ من 0، والصف الأول في الإكسل هو العناوين)
+          throw new Error(
+            `خطأ في الصف رقم ${index + 2}: هناك ملفات صوتية مفقودة أو خلايا فارغة. اختبار (${taskType}) يتطلب ${audioFiles.length} ملفات صوتية بالضبط.`
+          );
+        }
+
+        // ج. التحقق من وجود إجابة صحيحة
+        const correctAnswer = String(row["Correct Answer"] || row["Correct"] || row["Answer"] || "").trim();
+        if (!correctAnswer) {
+          throw new Error(`خطأ في الصف رقم ${index + 2}: "الإجابة الصحيحة" (Correct Answer) مفقودة.`);
+        }
+
+        // د. استخراج الخيارات (Options) للاختبارات التي تحتاجها
+        let options: string[] | undefined = undefined;
+        if (taskType === "Same-Different") {
+          options = ["متماثلان", "مختلفان"] ; // أو "متماثلان", "مختلفان" حسب ما تفضل
+        } else if (taskType === "AXB") {
+          options = ["الأول", "الثالث"];
+        } else {
+          const optionsStr = String(row["Options"] || row["Choices"] || "");
+          options = optionsStr ? optionsStr.split(",").map(s => s.trim()) : [];
+          if (options.length < 2) {
+            throw new Error(`خطأ في الصف رقم ${index + 2}: يجب توفير خيارين على الأقل لاختبار التحديد.`);
+          }
+        }
+
+        // دفع السؤال المعتمد إلى المصفوفة النهائية
+        trials.push({
+          trialNumber: Number(row["Trial"] || row["Question"] || index + 1),
+          audioFiles,
+          correctAnswer,
+          options,
+          pair: String(row["Pair"] || ""),
+          vowel: String(row["Vowel"] || ""),
+        });
+      }
+
+      // 3. حفظ الاختبار والأسئلة في Convex (لن يصل الكود إلى هنا إذا كان هناك خطأ)
       await createTest({
         title: title || `${module} - ${taskType}`,
         isPublished,
@@ -129,10 +143,11 @@ export default function ExcelUploader({ onUploadSuccess }: { onUploadSuccess: ()
       });
 
       alert("تم رفع الاختبار بنجاح!");
-      onUploadSuccess(); // إغلاق نافذة الرفع وتحديث القائمة
+      onUploadSuccess(); 
 
     } catch (err: any) {
-      console.error(err);
+      console.error("Upload Error:", err);
+      // إظهار رسالة الخطأ الدقيقة للمعلم
       setError(err.message || "حدث خطأ أثناء معالجة البيانات.");
     } finally {
       setIsUploading(false);
